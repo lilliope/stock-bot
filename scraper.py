@@ -2,6 +2,7 @@ import aiohttp
 import os
 
 SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY")
+print(f"ScraperAPI Key loaded: {SCRAPER_API_KEY[:5] if SCRAPER_API_KEY else 'NOT FOUND'}")
 
 def scraper_url(url):
     return f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={url}"
