@@ -1,4 +1,10 @@
 import aiohttp
+import os
+
+SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY")
+
+def scraper_url(url):
+    return f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={url}"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -14,13 +20,12 @@ async def check_target(tcin, store_id="3991"):
             f"?key=9f36aeafbe60771e321a7cc95a78140772ab3e96"
             f"&tcin={tcin}&store_id={store_id}&pricing_store_id={store_id}"
         )
-        headers = {**HEADERS, "Referer": "https://www.target.com/"}
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)) as r:
+            async with session.get(scraper_url(url), headers=HEADERS, timeout=aiohttp.ClientTimeout(total=30)) as r:
                 print(f"Target status: {r.status} for {tcin}")
                 if r.status != 200:
                     return None, None
-                data = await r.json()
+                data = await r.json(content_type=None)
                 product = data["data"]["product"]
                 status = product["fulfillment"]["shipping_options"]["availability_status"]
                 try:
@@ -37,13 +42,12 @@ async def check_target(tcin, store_id="3991"):
 async def check_walmart(item_id):
     try:
         url = f"https://www.walmart.com/terra-firma/item?ids={item_id}"
-        headers = {**HEADERS, "Referer": f"https://www.walmart.com/ip/{item_id}"}
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)) as r:
+            async with session.get(scraper_url(url), headers=HEADERS, timeout=aiohttp.ClientTimeout(total=30)) as r:
                 print(f"Walmart status: {r.status} for {item_id}")
                 if r.status != 200:
                     return None, None
-                data = await r.json()
+                data = await r.json(content_type=None)
                 product = data["payload"]["selected"]["product"]
                 available = product["buyBox"]["pickupEligible"]
                 try:
@@ -60,13 +64,12 @@ async def check_walmart(item_id):
 async def check_pokemoncenter(product_id):
     try:
         url = f"https://www.pokemoncenter.com/api/products/{product_id}"
-        headers = {**HEADERS, "Referer": "https://www.pokemoncenter.com/"}
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)) as r:
+            async with session.get(scraper_url(url), headers=HEADERS, timeout=aiohttp.ClientTimeout(total=30)) as r:
                 print(f"PokeCenter status: {r.status} for {product_id}")
                 if r.status != 200:
                     return None, None
-                data = await r.json()
+                data = await r.json(content_type=None)
                 in_stock = data.get("inStock", False)
                 try:
                     price = data["price"]
