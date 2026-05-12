@@ -89,7 +89,7 @@ async def check_all_stock():
     changed = False
 
     for item in wl:
-        result, price = check_stock(item)
+        result, price = await check_stock(item)
         if result is True and not item["in_stock"]:
             item["in_stock"] = True
             changed = True

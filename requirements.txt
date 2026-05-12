@@ -1,5 +1,5 @@
 discord.py
-requests
+aiohttp
 apscheduler
 python-dotenv
 playwright
